@@ -1,4 +1,5 @@
 type FirebaseErrorCode =
+  | "auth/email-not-verified"
   | "auth/claims-too-large"
   | "auth/email-already-exists"
   | "auth/email-already-in-use"
@@ -73,6 +74,8 @@ export function getFirebaseErrorMessage(error: unknown): string {
       return "An account with this email already exists";
 
     // Sign in errors
+    case "auth/email-not-verified":
+      return "Email is not verified";
     case "auth/user-not-found":
       return "No account found with this email";
     case "auth/wrong-password":
