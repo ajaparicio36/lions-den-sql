@@ -68,6 +68,10 @@ const LoginForm = () => {
         },
         body: JSON.stringify({ idToken: idToken }),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to log in");
+      }
     } catch (error) {
       const { message } = handleFirebaseError(error);
       setError(message);
