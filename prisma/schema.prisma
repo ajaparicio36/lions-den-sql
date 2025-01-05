@@ -12,3 +12,113 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String       @id @default(cuid())
+  ign       String
+  bio       String?
+  photoUrl  String?
+  teams     TeamMember[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([ign])
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  bio         String?
+  logoUrl     String?
+  members     TeamMember[]
+  posts       Post[]
+  events      Event[]
+  scrimLogs   ScrimLog[]
+  inviteCodes InviteCode[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([name])
+}
+
+model TeamMember {
+  id          String       @id @default(cuid())
+  role        String
+  dateJoined  DateTime     @default(now())
+  team        Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  posts       Post[]
+  events      Event[]
+  scrimLogs   ScrimLog[]
+  inviteCodes InviteCode[]
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model Post {
+  id           String     @id @default(cuid())
+  content      String
+  photos       String[]
+  dateCreated  DateTime   @default(now())
+  lastUpdated  DateTime   @updatedAt
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId       String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+  teamMemberId String
+
+  @@index([teamId])
+  @@index([teamMemberId])
+  @@index([dateCreated])
+}
+
+model ScrimLog {
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  photos       String[]
+  scrimDate    DateTime
+  lastUpdated  DateTime   @updatedAt
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId       String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+  teamMemberId String
+
+  @@index([teamId])
+  @@index([teamMemberId])
+  @@index([scrimDate])
+}
+
+model Event {
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  eventDate    DateTime
+  lastUpdated  DateTime   @updatedAt
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId       String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+  teamMemberId String
+
+  @@index([teamId])
+  @@index([teamMemberId])
+  @@index([eventDate])
+}
+
+model InviteCode {
+  id           String     @id @default(cuid())
+  code         String     @unique
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId       String
+  teamMember   TeamMember @relation(fields: [teamMemberId], references: [id], onDelete: Cascade)
+  teamMemberId String
+  createdAt    DateTime   @default(now())
+  expiresAt    DateTime?
+
+  @@index([teamId])
+  @@index([teamMemberId])
+  @@index([code])
+}
