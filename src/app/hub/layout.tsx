@@ -7,6 +7,7 @@ const HubLayout = async ({ children }: { children: React.ReactNode }) => {
   if (!decodedClaims) {
     redirect("/login");
   }
+
   return <section>{children}</section>;
 };
 
