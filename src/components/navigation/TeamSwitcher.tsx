@@ -20,6 +20,7 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { switchTeam } from "./teamActions";
 import CreateTeamDialog from "../teams/create/CreateTeamDialog";
+import JoinTeamDialog from "../teams/invite/JoinTeamDialog";
 
 interface Team {
   teams: {
@@ -37,9 +38,7 @@ const TeamSwitcher: React.FC<Team> = ({ teams, teamId }) => {
   );
   const [loading, setLoading] = useState(true);
   const [addTeamDialogOpen, setAddTeamDialogOpen] = useState(false);
-  console.log(teams);
-  console.log("Active", activeTeam);
-  console.log("TeamId", teamId);
+  const [joinTeamDialogOpen, setJoinTeamDialogOpen] = useState(false);
 
   useEffect(() => {
     setActiveTeam(teams.find((team) => team.id === teamId) || teams[0]);
@@ -102,6 +101,10 @@ const TeamSwitcher: React.FC<Team> = ({ teams, teamId }) => {
         <CreateTeamDialog
           isOpen={addTeamDialogOpen}
           setIsOpen={setAddTeamDialogOpen}
+        />
+        <JoinTeamDialog
+          isOpen={joinTeamDialogOpen}
+          setIsOpen={setJoinTeamDialogOpen}
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -180,6 +183,17 @@ const TeamSwitcher: React.FC<Team> = ({ teams, teamId }) => {
                 onClick={() => setAddTeamDialogOpen(true)}
               >
                 Add team
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 p-2">
+              <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                <Plus className="size-4" />
+              </div>
+              <div
+                className="font-medium text-muted-foreground"
+                onClick={() => setJoinTeamDialogOpen(true)}
+              >
+                Join Team
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
