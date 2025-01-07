@@ -14,13 +14,14 @@ datasource db {
 }
 
 model User {
-  id        String       @id @default(cuid())
-  ign       String
-  bio       String?
-  photoUrl  String?
-  teams     TeamMember[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id         String       @id @default(cuid())
+  ign        String
+  bio        String?
+  photoUrl   String?
+  teams      TeamMember[]
+  ownedTeams Team[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
   @@index([ign])
 }
@@ -30,6 +31,8 @@ model Team {
   name        String
   bio         String?
   logoUrl     String?
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
   members     TeamMember[]
   posts       Post[]
   events      Event[]

@@ -6,32 +6,107 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "../ui/sidebar";
-import TeamSwitcher from "./TeamSwitcher";
 import { getUserTeams } from "./teamActions";
+import TeamSwitcher from "./TeamSwitcher";
+import { User } from "@prisma/client";
+import { getUser } from "@/app/hub/actions";
+import { UserGroup } from "./UserGroup";
+import { LayoutDashboard, Users } from "lucide-react";
+import { SidebarLinks } from "./SidebarLinks";
 
-interface Team {
+interface TeamPreview {
+  id: string;
   name: string;
   logoUrl: string | null;
 }
 
-interface TeamWrapper {
-  team: Team;
+/*
+{
+  items,
+}: {
+  items: {
+    title: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: {
+      title: string;
+      url: string;
+    }[];
+  }[];
 }
+*/
 
-const AppSidebar = ({ uid }: { uid: string }) => {
-  const [teams, setTeams] = useState<TeamWrapper[]>([]);
+const Items = [
+  {
+    title: "The Den",
+    icon: LayoutDashboard,
+    items: [
+      {
+        title: "Feed",
+        url: "/hub/posts",
+      },
+      {
+        title: "Scrimmages",
+        url: "/hub/scrims",
+      },
+      {
+        title: "Events",
+        url: "/hub/schedule",
+      },
+    ],
+  },
+  {
+    title: "Management",
+    icon: Users,
+    items: [
+      {
+        title: "Members",
+        url: "/hub/members",
+      },
+      {
+        title: "Team",
+        url: "/hub/settings",
+      },
+    ],
+  },
+];
+
+const AppSidebar = ({
+  uid,
+  email,
+  teamId,
+}: {
+  uid: string;
+  email: string;
+  teamId: string;
+}) => {
   const [loading, setLoading] = useState(true);
+  const [teams, setTeams] = useState<TeamPreview[]>([]);
+  const [userData, setUserData] = useState<User | null>(null);
+  const user = {
+    uid,
+    email,
+  };
 
   useEffect(() => {
     const getTeams = async () => {
-      const teams = await getUserTeams(uid);
-      setTeams(teams);
-      setLoading(false);
+      const { teams: userTeams } = await getUserTeams(uid);
+      setTeams(userTeams ?? []);
     };
+    const getUserData = async () => {
+      const data = await getUser(uid);
+      setUserData(data.user);
+    };
+    getUserData();
     getTeams();
-  }, [uid]);
+    setLoading(false);
+  }, [uid, teamId]);
 
-  if (!!loading) {
+  if (!teamId || !uid) {
+    return null;
+  }
+
+  if (!!loading || teams.length === 0) {
     return (
       <Sidebar collapsible="icon">
         <SidebarHeader>
@@ -70,14 +145,19 @@ const AppSidebar = ({ uid }: { uid: string }) => {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <TeamSwitcher
-          teams={teams.map((wrapper) => ({
-            name: wrapper.team.name,
-            logoUrl: wrapper.team.logoUrl ?? "",
+          teams={teams.map((team) => ({
+            ...team,
+            logoUrl: team.logoUrl || "",
           }))}
+          teamId={teamId}
         />
       </SidebarHeader>
-      <SidebarContent></SidebarContent>
-      <SidebarFooter></SidebarFooter>
+      <SidebarContent>
+        <SidebarLinks items={Items} />
+      </SidebarContent>
+      <SidebarFooter>
+        <UserGroup user={user} userData={userData} />
+      </SidebarFooter>
     </Sidebar>
   );
 };
