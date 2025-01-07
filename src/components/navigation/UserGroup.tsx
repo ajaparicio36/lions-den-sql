@@ -19,6 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { User } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 export function UserGroup({
   user,
@@ -28,6 +29,14 @@ export function UserGroup({
   userData: User | null;
 }) {
   const { isMobile } = useSidebar();
+  const router = useRouter();
+
+  const handleLogOut = async () => {
+    const response = await fetch("/api/auth/logout");
+    if (response.ok) {
+      router.push("/login");
+    }
+  };
 
   if (!userData) {
     return null;
@@ -86,7 +95,7 @@ export function UserGroup({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogOut}>
               <LogOut />
               Log out
             </DropdownMenuItem>

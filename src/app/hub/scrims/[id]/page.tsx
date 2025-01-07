@@ -1,4 +1,3 @@
-import SignoutTry from "@/components/auth/SignoutTry";
 import { getSession } from "@/lib/auth/auth-cookies";
 import React from "react";
 import { checkIfUserExists } from "../../actions";
@@ -8,9 +7,12 @@ import {
   getCurrentTeam,
   getUserTeams,
 } from "@/components/navigation/teamActions";
+import prisma from "@/lib/prisma";
+import ScrimPageCard from "@/components/scrims/ScrimPageCard";
 
-const ScrimPage = async () => {
+const ScrimPage = async ({ params }: { params: Promise<{ id: string }> }) => {
   const decodedClaims = await getSession();
+  const { id: scrimId } = await params;
 
   if (!decodedClaims) {
     redirect("/login");
@@ -37,9 +39,19 @@ const ScrimPage = async () => {
     redirect("/hub");
   }
 
+  const currentScrim = await prisma.scrimLog.findUnique({
+    where: {
+      id: scrimId,
+    },
+  });
+
+  if (!currentScrim) {
+    redirect("/hub/scrims");
+  }
+
   return (
     <div className="flex flex-col gap-2 h-[90vh] justify-center items-center">
-      This is the scrim log for {currentTeam.name} <SignoutTry />{" "}
+      <ScrimPageCard scrim={currentScrim} />
     </div>
   );
 };

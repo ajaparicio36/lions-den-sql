@@ -8,6 +8,8 @@ import {
   getCurrentTeam,
   getUserTeams,
 } from "@/components/navigation/teamActions";
+import InviteButton from "@/components/teams/invite/InviteButton";
+import { getTeamMembers } from "@/components/teams/members/memberActions";
 
 const Members = async () => {
   const decodedClaims = await getSession();
@@ -37,9 +39,22 @@ const Members = async () => {
     redirect("/hub");
   }
 
+  const members = await getTeamMembers(currentTeam.id);
+
   return (
     <div>
       This is the members for team {currentTeam.name} <SignoutTry />{" "}
+      <div className="flex flex-col gap-2"></div>
+      {!!members && members.length > 0 ? (
+        members.map((member) => (
+          <div key={member.id}>
+            {member.user.ign} - {member.role}
+          </div>
+        ))
+      ) : (
+        <div>No members</div>
+      )}
+      <InviteButton teamId={currentTeam.id} teamMemberId={decodedClaims.uid} />{" "}
     </div>
   );
 };
