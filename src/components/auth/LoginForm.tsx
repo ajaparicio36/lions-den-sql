@@ -72,6 +72,8 @@ const LoginForm = () => {
       if (!response.ok) {
         throw new Error("Failed to log in");
       }
+
+      router.push("/hub");
     } catch (error) {
       const { message } = handleFirebaseError(error);
       setError(message);
